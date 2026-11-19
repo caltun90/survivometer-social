@@ -170,6 +170,74 @@ def psalign(ep, S, g):
     print(f"g{g}: {n} lines aligned" + (f"; BAD lines {bad} (re-record with: fixline {g} <line>)" if bad else "") + (f"; {extra:.1f} s of extra speech after the last line is ignored" if extra > 1 else ""))
 
 
+def tts_kokoro(ep, S, g):
+    """Local, quota-free narration with Kokoro (same voice every time). Lines are read one by one and joined with short silences."""
+    from kokoro_onnx import Kokoro
+    kd = os.environ.get("KOKORO_DIR", "/home/claude/kokoro")
+    k = Kokoro(os.path.join(kd, "kokoro-v1.0.onnx"), os.path.join(kd, "voices-v1.0.bin"))
+    v = getattr(S, "KOKORO_VOICE", "am_michael"); speed = float(os.environ.get("KOKORO_SPEED", getattr(S, "KOKORO_SPEED", 0.9)))
+    parts = [np.zeros(int(0.3 * SR), dtype=np.float32)]; bounds = []
+    for line in group_lines(S, g):
+        x, sr = k.create(line[0], voice=v, speed=speed, lang="en-gb" if v.startswith("b") else "en-us")
+        x = np.asarray(x, dtype=np.float32)
+        if sr != SR:
+            n = int(len(x) * SR / sr); x = np.interp(np.linspace(0, len(x) - 1, n), np.arange(len(x)), x).astype(np.float32)
+        t0 = sum(len(q) for q in parts) / SR; bounds.append([t0, t0 + len(x) / SR])
+        parts += [x, np.zeros(int(0.75 * SR), dtype=np.float32)]
+    bp = os.path.join(ep, "voice", "kokoro_bounds.json"); allb = json.load(open(bp)) if os.path.exists(bp) else {}
+    allb[str(g)] = bounds; json.dump(allb, open(bp, "w"))
+    y = np.concatenate(parts); y = y / max(1e-6, np.abs(y).max()) * 0.89
+    os.makedirs(os.path.join(ep, "voice"), exist_ok=True)
+    sf.write(os.path.join(ep, "voice", f"g{g}.wav"), y, SR)
+    print(f"g{g}: {len(y) / SR:.1f} s (kokoro {v}, speed {speed})", flush=True)
+
+
+def psalign_lines(ep, S, g):
+    """Kokoro audio: line boundaries are known, so align each line on its own (robust) and write cuts and words."""
+    from pocketsphinx import Decoder
+    lines = group_lines(S, g); B = json.load(open(os.path.join(ep, "voice", "kokoro_bounds.json")))[str(g)]
+    path = os.path.join(ep, "voice", f"g{g}.wav"); x, _ = sf.read(path, dtype="float32")
+    cuts, words = [], []
+    for i, l in enumerate(lines):
+        a, b = B[i]; seg = x[int(a * SR):int(b * SR)]
+        sil = silences(seg, 0.12); n = len(seg) / SR
+        a2 = a + (sil[0][1] - 0.02 if sil and sil[0][0] < 0.02 else 0.0); b2 = a + (sil[-1][0] + 0.04 if sil and sil[-1][1] > n - 0.02 else n)
+        seg = x[int(a2 * SR):int(b2 * SR)]
+        pcm = (np.clip(np.interp(np.linspace(0, len(seg) - 1, int(len(seg) * 16000 / SR)), np.arange(len(seg)), seg), -1, 1) * 32767).astype("<i2").tobytes()
+        dec = Decoder(samprate=16000, logfn=os.devnull)
+        sw = l[0].split(); toks = []
+        for j, w in enumerate(sw):
+            t = re.sub(r"(?<=\d),(?=\d)", "", w.lower()).replace("%", " percent").replace("-", " ").replace("\u2019", "'")
+            t = re.sub(r"\d+", lambda m: " " + _num(m.group()) + " ", t)
+            for tok in re.findall(r"[a-z']+", t):
+                tok = tok.strip("'")
+                if tok and dec.lookup_word(tok): toks.append((j, tok))
+        tm = {}
+        try:
+            dec.set_align_text(" ".join(t[1] for t in toks)); dec.start_utt(); dec.process_raw(pcm, full_utt=True); dec.end_utt()
+            sg = [(q.start_frame / 100, (q.end_frame + 1) / 100) for q in dec.seg() if not q.word.startswith("<") and q.word != "(NULL)"]
+            if len(sg) == len(toks):
+                for (j, _), (u, v) in zip(toks, sg): tm[j] = (tm[j][0], v) if j in tm else (u, v)
+        except Exception:
+            pass
+        d = b2 - a2
+        if len(tm) < len(sw):   # fill gaps (or everything) by character share
+            tot = sum(len(w) + 1 for w in sw); acc = 0.0; prop = []
+            for w in sw: u = d * acc / tot; acc += len(w) + 1; prop.append((u, d * acc / tot))
+            tm = {j: tm.get(j, prop[j]) for j in range(len(sw))}
+        cw = (l[2] if len(l) > 2 else l[0]).split(); m = len(sw); out = []
+        for k2, w in enumerate(cw):
+            j0 = k2 if len(cw) == m else min(m - 1, k2 * m // len(cw)); j1 = k2 if len(cw) == m else min(m - 1, max(j0, (k2 + 1) * m // len(cw) - 1))
+            out.append([round(min(tm[j0][0], d), 3), round(min(tm[j1][1], d), 3), w])
+        words.append(out)
+        nxt = B[i + 1][0] if i + 1 < len(lines) else b2 + 0.5
+        cuts.append([round(a2, 2), round(b2, 2), round(max(0.0, nxt - b2), 2)])
+    for name, val in (("cuts.json", cuts), ("words.json", words)):
+        pth = os.path.join(ep, "voice", name); allv = json.load(open(pth)) if os.path.exists(pth) else {}
+        allv[str(g)] = val; json.dump(allv, open(pth, "w"))
+    print(f"g{g}: {len(lines)} lines aligned line by line", flush=True)
+
+
 def silences(x, min_dur=0.14):
     hop = int(SR * 0.01); n = len(x) // hop
     rms = np.sqrt((x[:n * hop].reshape(n, hop) ** 2).mean(axis=1) + 1e-12)
@@ -450,8 +518,11 @@ if __name__ == "__main__":
             json.dump(st, open(sp, "w"))
     elif cmd == "autocut":
         for g in ([int(a) for a in sys.argv[3:]] or range(len(S.GROUPS))): autocut(ep, S, g)
+    elif cmd == "kokoro":
+        for g in ([int(a) for a in sys.argv[3:]] or range(len(S.GROUPS))): tts_kokoro(ep, S, g)
     elif cmd == "psalign":
-        for g in ([int(a) for a in sys.argv[3:]] or range(len(S.GROUPS))): psalign(ep, S, g)
+        kb = os.path.join(ep, "voice", "kokoro_bounds.json")
+        for g in ([int(a) for a in sys.argv[3:]] or range(len(S.GROUPS))): (psalign_lines if os.path.exists(kb) else psalign)(ep, S, g)
     elif cmd == "fixline":
         fixline(ep, S, int(sys.argv[3]), int(sys.argv[4]))
     elif cmd == "check":

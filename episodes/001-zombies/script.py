@@ -6,6 +6,7 @@ SLUG = "zombies"
 VOICE = "Algenib"
 STYLE = ("Narrate in English as a calm, gripping documentary narrator. Medium pace, low and steady, "
          "a little tension, with a clear short pause after every sentence:")
+KOKORO_VOICE = "am_michael"   # Cem chose it, 20 Nov 2026 (local Kokoro voice, same every time)
 START_ODDS = 50
 
 CHAPTERS = [
@@ -98,4 +99,4 @@ CHAPTERS = [
  ]),
 ]
 # TTS requests: one per group of chapters (voice quota is about 10 requests a day)
-GROUPS = [[0, 1], [2, 3], [4], [5], [6], [7]]
+GROUPS = [[0, 1], [2, 3], [4, 5], [6, 7]]

@@ -17,7 +17,8 @@ Bu depo kanalın tek kaynağıdır: `caltun90/survivometer-social` (herkese aç�
 - Mekan ve insanlar (Cem, 19 Kasım 2026): olaylar ABD ve Avrupa'da geçer. Her istemde: Amerikan şehri (tuğla apartman, yangın merdiveni, banliyö evleri, pikap, sarı okul otobüsü) ya da Amerikan kırsalı; cami, minare, kubbe yok; insanlar günlük Batı kıyafetlerinde, erkekler sakalsız, başörtüsü ya da türban yok.
 - Hikaye net olmalı: zombi bölümünde zombiler görünür ve olay örgüsü var (kapıyı yumruklayan komşu, market baskını, köprüdeki sürü, kamp gecesi). Zombiler çizgi film tarzı, yeşilimsi gri, kansız.
 - Ana karakter (sabit): büyük, tam yuvarlak açık renk kafa, küçük siyah oval gözler, küçük kaşlar, burun ve saç yok, teal (camgöbeği) kapüşonlu, lacivert kot, beyaz spor ayakkabı. Stil: cilalı 2D çizgi film anlatım stili, yumuşak cel gölge, sinematik ışık, katmanlı derinlik, 16:9, görselde hiç yazı yok.
-- Ses: Gemini TTS, ses Algenib (Cem seçti, 19 Kasım 2026).
+- Ses: yerel Kokoro modeli, ses am_michael (Cem seçti, 20 Kasım 2026). Kota yok, her bölümde birebir aynı ses. Model dosyaları GitHub'dan: thewh1teagle/kokoro-onnx releases model-files-v1.0 (kokoro-v1.0.onnx, voices-v1.0.bin), `pip install kokoro-onnx`. Komut: `KOKORO_SPEED=0.82 python3 engine/voice.py <bölüm> kokoro`, sonra `psalign` (satır satır hizalar) ve `GAP_MIN=0.42 GAP_MAX=0.75 BEAT=2.2 ... build`. Gemini TTS kullanma: aynı ses adı farklı isteklerde farklı çıkıyor (Cem fark etti).
+- Kanca (Cem, 20 Kasım 2026): her videonun ilk 4-5 saniyesi Veo ile hareketli video olacak. caltun90 hesabı Google'da Rusya bölgesine bağlı olduğu için Flow ve Gemini'de video şimdilik kapalı; bölge değişikliği bekleniyor.
 - Sayılar ve iddialar gerçek kaynağa dayanır, kaynak adı ekranda küçük yazıyla geçer. İhtimal yüzdeleri eğlence amaçlı tahmindir ve son ekranda bu yazılır.
 - Şiddet gösterilmez: zombiler yalnızca uzak siluet olarak çizilir; yara, kan ve silah çizilmez. Ton meraklı ve hafif.
 
