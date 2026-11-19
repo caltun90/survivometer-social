@@ -31,7 +31,11 @@ SHOTS = [
  ("s30", "store_rush", [32], True, None),
  ("n33", "street_noon", [33, 34], False, "Bright noon on an American main street: a grocery store two blocks away with an empty parking lot, a few cartoon zombies standing still in the sun, abandoned cars. The character crouches at the corner of a building in the left foreground with a backpack on, looking toward the store."),
  ("n35", "sneak_cars", [35], True, "Bright day: the character sneaks low between rows of parked American cars in a supermarket parking lot, soft sneakers, an empty backpack, a crowbar in his hand. Ahead, cartoon zombies face the other way."),
+ ("n36", "store_inside", [36], True, "p"),
+ ("n37", "cart_crash", [37], False, "p"),
+ ("n38", "back_door", [38], False, "p"),
  ("s12", "water_first", [39], False, None),
+ ("n40", "quiet_city_us", [40], False, "p"),
  ("n41", "sewage_us", [41], True, "An American city street with dirty water bubbling up from an open manhole and flooding the road, a few rats, a fallen trash can, brick buildings. The character on the left wears a cloth mask and steps carefully around it. Overcast, unpleasant but not gross."),
  ("s38", "rooftop_choice", [42, 43], True, None),
  ("s39", "valley_farm", [44], True, None),
@@ -50,9 +54,11 @@ SHOTS = [
  ("n57", "trade_us", [57, 58], False, "At a country crossroads with a red barn, two small groups of survivors in casual American clothes meet; on a wooden table they trade canned food, seeds, medicine and a water filter. The character shakes hands with the other group's leader, a woman in a flannel shirt. Late afternoon."),
  ("s52", "year_hill", [59], False, None),
  ("s53", "worn_silhouettes", [], True, None),
+ ("n60", "decaying_zombies", [60], True, "p"),
  ("s54", "first_winter", [61], False, None),
+ ("n62", "shepherd_radio", [62], False, "p"),
+ ("n63", "village", [63], True, "p"),
  ("s57", "new_gold", [64], False, None),
+ ("n68", "outro_wave_us", [68, 69, 70], False, "p"),
 ]
-REUSE = {65: "s04", 66: "n09", 67: "n55",
-         # stand-ins until the missing images are generated (ChatGPT image limit, 19 Nov)
-         36: "s30", 37: "s30", 38: "n35", 40: "n14", 60: "s53", 62: "n54", 63: "n56", 68: "n49", 69: "n49", 70: "n49"}
+REUSE = {65: "s04", 66: "n09", 67: "n63"}
