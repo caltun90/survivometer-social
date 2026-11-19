@@ -1,0 +1,7 @@
+__pycache__/
+*.wav
+*.mp4
+chk/
+segs.txt
+out/
+work/
