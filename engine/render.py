@@ -165,7 +165,7 @@ class Ep:
             for i, it in enumerate(items):
                 ai = ease((lt - i * dur * 0.8 / n) / 0.28)
                 if ai <= 0: continue
-                f, w, s2 = fit(it, "black", size, 1400); x0 = cx - w / 2
+                f, w, s2 = fit(it, "black", size, getattr(self, "_listw", 1400)); x0 = cx - w / 2
                 c.drawRoundRect(skia.Rect.MakeXYWH(x0 - 46 - (1 - ai) * 40, y0 + i * gap - s2 * 0.72, 16, s2 * 0.78), 6, 6, skia.Paint(AntiAlias=True, Color=col(accent, ai)))
                 c.drawString(it, x0 - (1 - ai) * 40, y0 + i * gap, f, skia.Paint(AntiAlias=True, Color=col("#FFFFFF", ai)))
         elif kind == "choice":
@@ -389,8 +389,9 @@ class Ep:
             c.drawRRect(skia.RRect.MakeRectXY(skia.Rect.MakeXYWH(px, py, pw, ph), 34, 34), skia.Paint(AntiAlias=True, Style=skia.Paint.kStroke_Style, StrokeWidth=3, Color=col(ch["accent"], 0.55 * a)))
             c.clipRect(skia.Rect.MakeXYWH(px, py, pw, ph))
             sc = 0.49 if kind == "card" else 0.6
+            self._listw = pw / sc - 190
             c.translate(px + pw / 2, py + ph / 2); c.scale(sc, sc); c.translate(-W / 2, -H / 2)
-            self.visual(c, max(t, l["start"]), l, ch["accent"]); c.restore()
+            self.visual(c, max(t, l["start"]), l, ch["accent"]); c.restore(); self._listw = 1400
         elif kind in ("choice", "odds", "final"):
             c.drawRect(skia.Rect.MakeWH(W, H), skia.Paint(Color=skia.Color(4, 6, 10, 175)))
             c.save()

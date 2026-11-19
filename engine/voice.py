@@ -11,8 +11,8 @@ TTS_MODEL = os.environ.get("TTS_MODEL", "gemini-3.1-flash-tts-preview")
 ASR_MODEL = os.environ.get("ASR_MODEL", "gemini-3-flash-preview")
 SR = 24000
 LEAD = 0.20            # voice starts this early (hook rule: sound by 0.5 s)
-BEAT = 1.9             # chapter title card length
-GAP_MIN, GAP_MAX = 0.28, 0.55
+BEAT = float(os.environ.get("BEAT", "1.9"))            # chapter title card length
+GAP_MIN, GAP_MAX = float(os.environ.get("GAP_MIN", "0.28")), float(os.environ.get("GAP_MAX", "0.55"))
 TAIL = 1.6
 
 
@@ -365,6 +365,9 @@ def bed(total, beats, ticks):
     return x.astype(np.float32)
 
 
+STRETCH = float(os.environ.get('STRETCH', '1.0'))
+
+
 def build(ep, S):
     sp = os.path.join(ep, "voice", "fix.json")
     starts = json.load(open(sp)) if os.path.exists(sp) else {}
@@ -390,6 +393,11 @@ def build(ep, S):
                     tmp = os.path.join(ep, "voice", "hook")
                     sf.write(tmp + "_in.wav", s, SR)
                     subprocess.run(["ffmpeg", "-loglevel", "error", "-y", "-i", tmp + "_in.wav", "-filter:a", f"atempo={len(s) / SR / 1.72:.3f}", tmp + "_out.wav"], check=True)
+                    n_in = len(s); s, _ = sf.read(tmp + "_out.wav", dtype="float32"); scale = len(s) / n_in
+                elif STRETCH != 1.0:   # slow the read a little when the episode runs short (hook excluded)
+                    tmp = os.path.join(ep, "voice", "st")
+                    sf.write(tmp + "_in.wav", s, SR)
+                    subprocess.run(["ffmpeg", "-loglevel", "error", "-y", "-i", tmp + "_in.wav", "-filter:a", f"atempo={STRETCH:.3f}", tmp + "_out.wav"], check=True)
                     n_in = len(s); s, _ = sf.read(tmp + "_out.wav", dtype="float32"); scale = len(s) / n_in
                 d = len(s) / SR
                 cap = (line[2] if len(line) > 2 else line[0])
