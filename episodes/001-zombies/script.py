@@ -3,7 +3,7 @@ Visuals: ("hook", text) ("big", text, sub) ("card", value, label, source) ("icon
          ("choice", A, B) ("odds", value) ("list", [items]) ("final", value, label)"""
 TITLE = "What If Zombies Took Over Tomorrow?"
 SLUG = "zombies"
-VOICE = "Charon"
+VOICE = "Algenib"
 STYLE = ("Narrate in English as a calm, gripping documentary narrator. Medium pace, low and steady, "
          "a little tension, with a clear short pause after every sentence:")
 START_ODDS = 50

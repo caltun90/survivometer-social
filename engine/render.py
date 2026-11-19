@@ -312,6 +312,93 @@ class Ep:
         rec = skia.PictureRecorder(); cc = rec.beginRecording(skia.Rect.MakeWH(W, H))
         self._info = [f(cc, 0.0, toon.Cam(0.0)) for f in toon.SETS]; self._scratch = None
 
+    # ---------- image mode: one illustration per shot (episodes/<ep>/shots.py + img/), slow camera moves, overlays ----------
+    def prep_images(self):
+        import importlib.util, glob
+        spec = importlib.util.spec_from_file_location("shots", os.path.join(self.ep, "shots.py")); m = importlib.util.module_from_spec(spec); spec.loader.exec_module(m)
+        line_img = {}
+        for sid, name, lines, side, desc in m.SHOTS:
+            for li in lines: line_img[li] = sid
+        for li, sid in m.REUSE.items(): line_img[li] = sid
+        files = {}
+        for sid, name, *_ in m.SHOTS:
+            f = sorted(glob.glob(os.path.join(self.ep, "img", f"{sid}_*.png")) + glob.glob(os.path.join(self.ep, "img", f"{sid}_*.jpg")))
+            if not f and os.environ.get("ALLOW_MISSING"): f = sorted(glob.glob(os.path.join(self.ep, "img", "*.png")))[:1]
+            if not f: raise SystemExit(f"missing image for {sid}")
+            files[sid] = f[-1]
+        cache = {}
+        def load(sid):
+            if sid not in cache:
+                from PIL import Image
+                im = Image.open(files[sid]).convert("RGBA"); sc = max(W / im.width, H / im.height)
+                im = im.resize((int(im.width * sc + 0.5), int(im.height * sc + 0.5)), Image.LANCZOS)
+                l, tp = (im.width - W) // 2, (im.height - H) // 2; im = im.crop((l, tp, l + W, tp + H))
+                cache[sid] = skia.Image.fromarray(np.array(im), colorType=skia.kRGBA_8888_ColorType)
+            return cache[sid]
+        self.load_img = load
+        # segments: a line's picture starts at its chapter start (first line) or at the end of the previous line
+        segs = []
+        for i, l in enumerate(self.lines):
+            t0 = self.ch[l["ch"]]["start"] if (i == 0 or self.lines[i - 1]["ch"] != l["ch"]) else l["start"]
+            sid = line_img[i]
+            if segs and segs[-1][2] == sid: continue
+            segs.append([t0, None, sid])
+        for k in range(len(segs)): segs[k][1] = segs[k + 1][0] if k + 1 < len(segs) else self.total + 1
+        self.isegs = segs
+
+    def draw_img(self, c, k, t, alpha=1.0):
+        t0, t1, sid = self.isegs[k]; d = max(1.0, t1 - t0); u = min(1.0, max(0.0, (t - t0) / d))
+        im = self.load_img(sid)
+        zin = k % 2 == 0
+        z = 1.05 + 0.09 * (u if zin else 1 - u)
+        dirs = [(1, 0.3), (-1, -0.2), (0.6, -0.5), (-0.7, 0.4)]; dx, dy = dirs[k % 4]
+        ox = dx * (u - 0.5) * W * (z - 1.0) * 0.8; oy = dy * (u - 0.5) * H * (z - 1.0) * 0.8
+        c.save(); c.translate(W / 2 + ox, H / 2 + oy); c.scale(z, z); c.translate(-W / 2, -H / 2)
+        p = skia.Paint(AntiAlias=True); p.setAlphaf(alpha)
+        c.drawImageRect(im, skia.Rect.MakeWH(W, H), skia.SamplingOptions(skia.FilterMode.kLinear), p)
+        c.restore()
+
+    def frame3(self, c, t):
+        ci = max(i for i, x in enumerate(self.ch) if x["start"] <= t) if t >= 0 else 0
+        ch = self.ch[ci]; on_card = bool(ch["beat"]) and ch["beat"][0] <= t < ch["beat"][1]
+        cur = [l for l in self.lines if l["start"] <= t]
+        l = cur[-1] if cur else self.lines[0]
+        if on_card: l = [x for x in self.lines if x["ch"] == ci][0]
+        kind = l["visual"][0]
+        k = max(j for j, sg in enumerate(self.isegs) if sg[0] <= t) if t >= self.isegs[0][0] else 0
+        self.draw_img(c, k, t)
+        FADE = 0.45
+        if k > 0 and t - self.isegs[k][0] < FADE:   # cross-fade from the previous picture
+            self.draw_img(c, k - 1, t, 1.0 - ease((t - self.isegs[k][0]) / FADE))
+        toon.vignette(c, 0.55)
+        if kind == "hook":
+            words = l["visual"][1].split(); mid = (len(words) + 1) // 2
+            c.drawRect(skia.Rect.MakeXYWH(0, 0, W, 420), skia.Paint(Shader=skia.GradientShader.MakeLinear([(0, 0), (0, 420)], [skia.Color(0, 0, 0, 170), skia.Color(0, 0, 0, 0)])))
+            for j, (line_txt, colr) in enumerate(((" ".join(words[:mid]), "#FFFFFF"), (" ".join(words[mid:]), ch["accent"]))):
+                f, w, size = fit(line_txt, "black", 148, 1700); yy = 190 + j * 150
+                c.drawString(line_txt, W / 2 - w / 2, yy, f, skia.Paint(AntiAlias=True, Color=toon.INK, Style=skia.Paint.kStroke_Style, StrokeWidth=22, StrokeJoin=skia.Paint.kRound_Join))
+                c.drawString(line_txt, W / 2 - w / 2, yy, f, skia.Paint(AntiAlias=True, Color=col(colr)))
+        side = kind in ("list", "card")
+        if on_card:
+            c.drawRect(skia.Rect.MakeWH(W, H), skia.Paint(Color=skia.Color(4, 6, 10, 165))); self.card(c, t, ch)
+        elif side:
+            a = ease((t - l["start"]) / 0.35)
+            px, py, pw, ph = 1060, 285, 810, 515
+            c.save(); c.translate((1 - a) * 120, 0)
+            c.drawRRect(skia.RRect.MakeRectXY(skia.Rect.MakeXYWH(px, py, pw, ph), 34, 34), skia.Paint(AntiAlias=True, Color=skia.Color(8, 11, 18, int(205 * a))))
+            c.drawRRect(skia.RRect.MakeRectXY(skia.Rect.MakeXYWH(px, py, pw, ph), 34, 34), skia.Paint(AntiAlias=True, Style=skia.Paint.kStroke_Style, StrokeWidth=3, Color=col(ch["accent"], 0.55 * a)))
+            c.clipRect(skia.Rect.MakeXYWH(px, py, pw, ph))
+            sc = 0.49 if kind == "card" else 0.6
+            c.translate(px + pw / 2, py + ph / 2); c.scale(sc, sc); c.translate(-W / 2, -H / 2)
+            self.visual(c, max(t, l["start"]), l, ch["accent"]); c.restore()
+        elif kind in ("choice", "odds", "final"):
+            c.drawRect(skia.Rect.MakeWH(W, H), skia.Paint(Color=skia.Color(4, 6, 10, 175)))
+            c.save()
+            if kind in ("odds", "final"): c.translate(W / 2, H * 0.455); c.scale(0.84, 0.84); c.translate(-W / 2, -H / 2)
+            self.visual(c, max(t, l["start"]), l, ch["accent"]); c.restore()
+        self.hud(c, t, ch, on_card, kind in ("odds", "final") and not on_card)
+        if not on_card: self.caption2(c, t, H * 0.90 if kind in ("choice", "odds", "final") else None)
+
 
 def surface():
     arr = np.zeros((H, W, 4), dtype=np.uint8); return arr, skia.Surface(arr)
@@ -319,6 +406,8 @@ def surface():
 
 if __name__ == "__main__":
     ep, cmd = sys.argv[1], sys.argv[2]; E = Ep(ep); E.prep(); E.frame = E.frame2
+    if os.path.exists(os.path.join(ep, "shots.py")) and os.environ.get("RENDER_MODE", "img") == "img":
+        E.prep_images(); E.frame = E.frame3
     if cmd == "frames":
         os.makedirs(os.path.join(ep, "chk"), exist_ok=True)
         for a in sys.argv[3:]:

@@ -13,7 +13,9 @@ Bu depo kanalın tek kaynağıdır: `caltun90/survivometer-social` (herkese aç�
 
 - Başlık her zaman "What If ...?" sorusudur. Örnek: "What If You Could Stop Time?", "What If Zombies Took Over Tomorrow?"
 - İlk 2 saniye kanca: en fazla 8 kelimelik cümle, 2.0 saniyeden önce biter. İlk kare dolu olur (boş ya da kararan açılış yok), ekranda en fazla 5 kelimelik kanca yazısı ve hareket vardır.
-- Görseller kodla çizilir (yuvarlak kafalı düz çizgi karakter, ışıklı 2.5D sahneler, bir iki kelimelik altyazı). ChatGPT ya da başka görsel üretimi kullanılmaz.
+- Görseller ChatGPT'de üretilir (19 Kasım 2026 Cem kararı: "bu görseller daha güzel"). Her bölüm için yaklaşık 50 sahne, hepsi aynı karakter ve stil. Kodla çizilen eski mod (toon.py) yalnızca yedek.
+- Ana karakter (sabit): büyük, tam yuvarlak açık renk kafa, küçük siyah oval gözler, küçük kaşlar, burun ve saç yok, teal (camgöbeği) kapüşonlu, lacivert kot, beyaz spor ayakkabı. Stil: cilalı 2D çizgi film anlatım stili, yumuşak cel gölge, sinematik ışık, katmanlı derinlik, 16:9, görselde hiç yazı yok.
+- Ses: Gemini TTS, ses Algenib (Cem seçti, 19 Kasım 2026).
 - Sayılar ve iddialar gerçek kaynağa dayanır, kaynak adı ekranda küçük yazıyla geçer. İhtimal yüzdeleri eğlence amaçlı tahmindir ve son ekranda bu yazılır.
 - Şiddet gösterilmez: zombiler yalnızca uzak siluet olarak çizilir; yara, kan ve silah çizilmez. Ton meraklı ve hafif.
 
@@ -26,6 +28,14 @@ Bu depo kanalın tek kaynağıdır: `caltun90/survivometer-social` (herkese aç�
 - `log.json`: bölüm kayıtları. Durumlar: taslak, onay-bekliyor, yuklendi.
 
 ## 4. Bölüm üretimi
+
+Görsel adımı (ses ve hizalamadan sonra, render'dan önce):
+- `episodes/NNN-slug/shots.py`: SHOTS = (kimlik, ad, satır numaraları, side, açıklama). Her satır tam bir sahneye ya da REUSE ile başka sahnenin görseline bağlanır. Liste ve kart satırlarının sahnesinde `side=True`: karakter solda, sağ %40 sakin, çünkü bilgi paneli sağa gelir.
+- ChatGPT'de yeni bir sohbet aç. İlk mesajda stil ve karakter tarifini ver, sonra her mesajda tek görsel iste. Her istemin başına kısa stil ve karakter hatırlatması ekle (yoksa 12-13 görselden sonra stil kayıyor). İstemde etiket `SHOT (sNN_ad)` biçiminde olsun; indirme etiketle eşleşir.
+- Görseller Cem'in Downloads klasörüne `survNNN_sNN_ad.png` adıyla iner. Adla stage et (Downloads'u listeleme, çok büyük), `episodes/NNN-slug/img/sNN_ad.png` olarak kopyala. img/ depoya girmez.
+- Her 10-12 görselde bir toplu kontrol: karakter aynı mı, yazı var mı, stil kaydı mı. Bozuk olanı aynı etiketle tekrar iste.
+- Render `shots.py` varsa otomatik görsel modunda çalışır (`RENDER_MODE=toon` eski mod).
+
 
 Kurulum: `pip install --break-system-packages skia-python numpy soundfile pillow pocketsphinx`, ayrıca ffmpeg.
 
