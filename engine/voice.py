@@ -178,7 +178,17 @@ def tts_kokoro(ep, S, g):
     v = getattr(S, "KOKORO_VOICE", "am_michael"); speed = float(os.environ.get("KOKORO_SPEED", getattr(S, "KOKORO_SPEED", 0.9)))
     parts = [np.zeros(int(0.3 * SR), dtype=np.float32)]; bounds = []
     for line in group_lines(S, g):
-        x, sr = k.create(line[0], voice=v, speed=speed, lang="en-gb" if v.startswith("b") else "en-us")
+        lg = "en-gb" if v.startswith("b") else "en-us"
+        st = v
+        if ":" in v:   # blend, e.g. "am_puck:0.3,am_fenrir:0.7"
+            st = sum(float(w) * k.get_voice_style(n) for n, w in (x.split(":") for x in v.split(",")))
+        fix = getattr(S, "PRONOUNCE", {}) or {"sɚvɪvˈɑːmɪɾɚ": "sɚvˈaɪvoʊmˌiːɾɚ"}   # Survivometer -> "survive-o-meter" (Cem, 20 Nov 2026)
+        ph = k.tokenizer.phonemize(line[0], lg)
+        if any(a in ph for a in fix):
+            for a, b in fix.items(): ph = ph.replace(a, b)
+            x, sr = k.create(ph, voice=st, speed=speed, lang=lg, is_phonemes=True)
+        else:
+            x, sr = k.create(line[0], voice=st, speed=speed, lang=lg)
         x = np.asarray(x, dtype=np.float32)
         if sr != SR:
             n = int(len(x) * SR / sr); x = np.interp(np.linspace(0, len(x) - 1, n), np.arange(len(x)), x).astype(np.float32)

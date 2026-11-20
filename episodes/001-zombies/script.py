@@ -6,20 +6,20 @@ SLUG = "zombies"
 VOICE = "Algenib"
 STYLE = ("Narrate in English as a calm, gripping documentary narrator. Medium pace, low and steady, "
          "a little tension, with a clear short pause after every sentence:")
-KOKORO_VOICE = "am_michael"   # Cem chose it, 20 Nov 2026 (local Kokoro voice, same every time)
+KOKORO_VOICE = "am_puck:0.3,am_fenrir:0.7"   # Cem chose this blend, 20 Nov 2026 (local Kokoro, same every time)
 START_ODDS = 50
 
 CHAPTERS = [
  dict(label="HOUR 0", clock="07:00", tag="THE PHONE WON'T STOP", accent="#FFB020", lines=[
   ("The dead are walking. Now what?", ("hook", "THE DEAD ARE WALKING")),
-  ("It's seven a.m. tomorrow. You're making coffee when your phone buzzes on the counter. Then again. And again. An outbreak at a city hospital, and one word on every screen. Lockdown.", ("big", "7:00 AM", "TOMORROW")),
+  ("It's seven in the morning, tomorrow. You're making coffee when your phone buzzes on the counter. Then again. And again. An outbreak at a city hospital, and one word on every screen. Lockdown.", ("big", "7:00 AM", "TOMORROW")),
   ("You go to the window. A car alarm is wailing, someone is screaming, and a man in a torn shirt is walking slowly down the middle of your street.", ("big", "SOMETHING", "IS WALKING DOWN YOUR STREET")),
   ("He doesn't flinch at the noise. He walks toward it. In this story, they are slow, they follow sound and light, and one bite is all it takes.", ("list", ["THEY ARE SLOW", "SOUND AND LIGHT", "ONE BITE"])),
   ("This is The Survivometer. We'll live through it hour by hour, and at the end, we'll see your odds of making it one full year.", ("big", "THE SURVIVOMETER", "HOUR BY HOUR. ONE FULL YEAR.")),
   ("Right now, it's a coin flip. Fifty percent. Every small decision from here moves the needle.", ("odds", 50)),
  ]),
  dict(label="HOUR 1", clock="08:00", tag="A KNOCK AT THE DOOR", accent="#FF8A1F", lines=[
-  ("Eight a.m. Someone is pounding on your door. It's your neighbor from across the hall. You call his name. He doesn't answer. He just keeps pounding.", ("big", "KNOCK KNOCK", "DO NOT OPEN IT")),
+  ("Eight in the morning. Someone is pounding on your door. It's your neighbor from across the hall. You call his name. He doesn't answer. He just keeps pounding.", ("big", "KNOCK KNOCK", "DO NOT OPEN IT")),
   ("You don't open it. You press your back against the door and wait until the pounding fades down the hallway.", ("big", "GOOD CALL", "THE DOOR STAYS SHUT")),
   ("Outside, the whole street has the same idea. Car doors slam, engines start, and everyone grabs their keys and drives.", ("icon", "car", "DRIVE?")),
   ("But a city of a million people can't squeeze through a handful of roads. Within an hour, the highway is a parking lot, and the dead are walking between the cars.", ("card", "1,000,000", "PEOPLE. A HANDFUL OF ROADS.", "")),
@@ -29,7 +29,7 @@ CHAPTERS = [
   ("And there's a reserve most people forget. The water heater in your closet holds about forty gallons of clean water. Staying put pushes your odds to fifty five.", ("odds", 55)),
  ]),
  dict(label="HOUR 6", clock="13:00", tag="THE SIRENS STOP", accent="#FF6A2A", lines=[
-  ("One p.m. Something has changed, and it takes you a moment to notice. The sirens have stopped. Not because it's over. Because no one is left to answer the calls.", ("big", "SILENCE", "THE SIRENS STOPPED")),
+  ("One in the afternoon. Something has changed, and it takes you a moment to notice. The sirens have stopped. Not because it's over. Because no one is left to answer the calls.", ("big", "SILENCE", "THE SIRENS STOPPED")),
   ("From your window you start counting. Ten on your block. Then thirty. Every car alarm and every scream pulls more of them toward the noise.", ("big", "10... 30...", "EVERY SCREAM PULLS MORE")),
   ("Your phone still shows one bar, but not for long. Cell towers run on backup batteries that typically last between two and eight hours.", ("card", "2-8 HRS", "TYPICAL CELL TOWER BATTERY BACKUP", "Sources: FCC backup power rule, industry reports")),
   ("So you use it while you can. One message to the people you love. Where you are, and where you'll meet if the phones die.", ("list", ["ONE MESSAGE", "WHERE YOU ARE", "WHERE YOU WILL MEET"])),
@@ -38,7 +38,7 @@ CHAPTERS = [
   ("Quiet, prepared, and still unseen. Your odds tick up to fifty eight.", ("odds", 58)),
  ]),
  dict(label="DAY 1", clock="19:40", tag="THE LIGHTS GO OUT", accent="#FF4D3D", lines=[
-  ("Seven forty p.m. The TV flickers, the fridge goes quiet, and the lights go out.", ("icon", "bolt", "BLACKOUT")),
+  ("Seven forty in the evening. The TV flickers, the fridge goes quiet, and the lights go out.", ("icon", "bolt", "BLACKOUT")),
   ("Power plants need fuel deliveries and people at the controls. Energy analysts who gamed out this exact scenario estimated that fossil fuel plants would start shutting down within about twenty four hours.", ("card", "24 HRS", "UNTIL FOSSIL PLANTS START TO TRIP", "Source: Rocky Mountain Institute"), "Power plants need fuel deliveries and people at the controls. Energy analysts who gamed out this exact scenario estimated that fossil fuel plants would start shutting down within about 24 hours."),
   ("Then it falls like dominoes. No gas pumps. No card readers, so suddenly only cash works. No refrigeration, and no elevators.", ("list", ["NO GAS PUMPS", "NO CARD PAYMENTS", "NO FRIDGES", "NO ELEVATORS"])),
   ("That night, the city is darker than it has been in a hundred years. And in the dark, any light is a beacon.", ("big", "LIGHT", "IS A BEACON")),
