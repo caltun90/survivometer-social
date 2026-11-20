@@ -38,7 +38,8 @@ Sahne cihazları (Cem'in örnek videosundan, 20 Kasım 2026; videoyu düz slayt 
 - Bölüm başlıkları kara tahtaya tebeşirle yazılır (chalk_card).
 - Telefon ve TV araya girişleri: shots.py'de INSERTS = {satır: ("phone_alerts" | "phone_message" | "phone_silent" | "tv", başlangıç oranı)}. Yeni bölümde konuya uyan 3-5 araya giriş seç; yeni ekran türü gerekirse fx.py'ye ekle.
 - Ortak görseller engine/assets/ (masa ve defter, kara tahta, eldeki telefon, TV). Her bölümde yeniden üretme.
-- Plan: ilk 4-5 saniye Veo videosu (hesap bölgesi Türkiye olunca).
+- Veo klipleri (20 Kasım 2026): caltun90 hesabında gemini.google.com/u/0/videos sayfasında "Videolar" modu açık (Google AI Plus, günde yaklaşık 2 video, 10 sn, 1280x720). Flow bu hesapta kapalı (bölge Rusya). Yöntem: "+" menüsünü aç, `input[type=file]` öğelerine aria-label ver, find ile ref al, file_upload ile görseli yükle (dosya yolu konteynerdeki /mnt/user-data/uploads/... olmalı), istemi yaz, gönder; video hazır olunca sayfadaki `video` öğesinin src'sini fetch edip indir. İstem: "Animate this exact image, keep the same 2D cartoon style..." + tek net hareket + "No text, no captions, no dialogue".
+- Her bölümde: klip 1 = kanca (ilk 4-6 sn, hook satırı ve sonraki satırın başı aynı sahne), klip 2 = bölümün en gerilimli anı. shots.py: `CLIPS = {"s01": "clips/s01.mp4"}`; render klibi o sahnenin yerine oynatır, klip bitince son karede durur.
 
 Görsel adımı (ses ve hizalamadan sonra, render'dan önce):
 - `episodes/NNN-slug/shots.py`: SHOTS = (kimlik, ad, satır numaraları, side, açıklama). Her satır tam bir sahneye ya da REUSE ile başka sahnenin görseline bağlanır. Liste ve kart satırlarının sahnesinde `side=True`: karakter solda, sağ %40 sakin, çünkü bilgi paneli sağa gelir.

@@ -326,6 +326,15 @@ class Ep:
             for li in lines: line_img[li] = sid
         for li, sid in m.REUSE.items(): line_img[li] = sid
         self.inserts = getattr(m, "INSERTS", {})
+        # short Veo clips that replace a shot's still image: shots.py CLIPS = {"s01": "clips/s01.mp4"}
+        self.clips = {}
+        for sid, rel in getattr(m, "CLIPS", {}).items():
+            src = os.path.join(self.ep, rel); d = os.path.join(self.ep, "clip_frames", sid)
+            if not os.path.exists(os.path.join(d, "done")):
+                os.makedirs(d, exist_ok=True)
+                subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", src, "-vf", f"fps={FPS},scale={W}:{H}:force_original_aspect_ratio=increase,crop={W}:{H}", "-q:v", "2", os.path.join(d, "%04d.jpg")], check=True)
+                open(os.path.join(d, "done"), "w").write("ok")
+            self.clips[sid] = sorted(f for f in os.listdir(d) if f.endswith(".jpg")); self.clip_dir = getattr(self, "clip_dir", {}); self.clip_dir[sid] = d
         spec2 = importlib.util.spec_from_file_location("script", os.path.join(self.ep, "script.py")); m2 = importlib.util.module_from_spec(spec2); spec2.loader.exec_module(m2)
         self.clocks = [c.get("clock") for c in m2.CHAPTERS]
         files = {}
@@ -356,6 +365,12 @@ class Ep:
 
     def draw_img(self, c, k, t, alpha=1.0):
         t0, t1, sid = self.isegs[k]; d = max(1.0, t1 - t0); u = min(1.0, max(0.0, (t - t0) / d))
+        if sid in getattr(self, "clips", {}):
+            fr = self.clips[sid]; i = min(len(fr) - 1, max(0, int((t - t0) * FPS)))
+            im = skia.Image.open(os.path.join(self.clip_dir[sid], fr[i]))
+            p = skia.Paint(AntiAlias=True); p.setAlphaf(alpha)
+            c.drawImageRect(im, skia.Rect.MakeWH(W, H), skia.SamplingOptions(skia.FilterMode.kLinear), p)
+            return
         im = self.load_img(sid)
         zin = k % 2 == 0
         z = 1.05 + 0.09 * (u if zin else 1 - u)

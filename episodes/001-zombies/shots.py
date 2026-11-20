@@ -1,8 +1,8 @@
 # One image per shot. lines = narration line indices. side=True: action on the left, the right 40% stays calm for the panel.
 # desc None = reuse the existing image of that id in img/. REUSE maps extra lines to another shot's image.
 SHOTS = [
- ("s01", "hook_window", [0], False, None),
- ("s02", "bedroom_news", [1], False, None),
+ ("s01", "hook_window", [0, 1], False, None),
+ ("s02", "bedroom_news", [], False, None),
  ("n02", "street_first_zombie", [2], False, "Morning. Seen from the character's apartment window, looking down at a quiet American residential street: a single cartoon zombie walks slowly down the middle of the road, a parked car flashes its hazard lights from an alarm, a woman in a jacket runs away in the distance. The character's hands and shocked face in the foreground at the window."),
  ("n03", "zombie_rules", [3], True, "A lone cartoon zombie in a torn office shirt and loose tie shuffles down an empty American suburban sidewalk at dawn under a streetlight, arms forward, a mailbox and a picket fence nearby."),
  ("s04", "survivometer_dial", [4, 5], False, None),
@@ -64,3 +64,5 @@ SHOTS = [
 REUSE = {65: "s04", 66: "n09", 67: "n63"}
 # cutaways drawn in code: line -> (device, start as a fraction of the line)
 INSERTS = {1: ("phone_alerts", 0.35), 17: ("phone_message", 0.25), 18: ("phone_silent", 0.2), 21: ("tv", 0.0)}
+# short Veo clips (Gemini, image to video) that replace the still of a shot
+CLIPS = {"s01": "clips/s01.mp4", "n06": "clips/n06.mp4"}
