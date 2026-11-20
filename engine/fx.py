@@ -87,8 +87,11 @@ def write(c, s, x, y, f, color, prog, align="l"):
     """Draw text revealed left to right (prog 0..1). Returns the pen tip position."""
     w = f.measureText(s); x0 = x - (w / 2 if align == "c" else 0)
     if prog <= 0: return x0, y
-    c.save(); c.clipRect(skia.Rect.MakeLTRB(x0 - 10, y - f.getSize() * 1.3, x0 + w * min(1.0, prog), y + f.getSize() * 0.5))
-    c.drawString(s, x0, y, f, skia.Paint(AntiAlias=True, Color=color)); c.restore()
+    if prog >= 1.0:   # finished words are drawn without a clip, so tails like y, g, s are never cut
+        c.drawString(s, x0, y, f, skia.Paint(AntiAlias=True, Color=color))
+    else:
+        c.save(); c.clipRect(skia.Rect.MakeLTRB(x0 - f.getSize() * 0.3, y - f.getSize() * 1.4, x0 + w * prog, y + f.getSize() * 0.6))
+        c.drawString(s, x0, y, f, skia.Paint(AntiAlias=True, Color=color)); c.restore()
     wob = math.sin(prog * 40) * f.getSize() * 0.12
     return x0 + w * min(1.0, prog), y - f.getSize() * 0.35 + wob
 
@@ -111,6 +114,12 @@ def sentence(s):
 
 
 # ---------------- notepad: stats and lists are written by hand ----------------
+def notepad_len(l):
+    """How long the notepad stays on screen: writing time plus a short hold, then the picture comes back."""
+    v = l["visual"]
+    return 0.15 + 0.9 + 1.4 + 1.2 if v[0] == "card" else 0.2 + len(v[1]) * 0.95 + 1.2
+
+
 def notepad(c, t, l, accent, t_in):
     R = rects()["a1_desk_notepad"]; x0, y0, x1, y1 = R
     draw_asset(c, "a1_desk_notepad", t_in, t)
@@ -133,13 +142,13 @@ def notepad(c, t, l, accent, t_in):
             c.drawLine((x0 + x1) / 2 - fb.measureText(big) / 2, yb + 22, (x0 + x1) / 2 + fb.measureText(big) / 2, yb + 26, skia.Paint(AntiAlias=True, Color=skia.Color(200, 40, 40), StrokeWidth=7, StrokeCap=skia.Paint.kRound_Cap))
         if src and p2 > 1.0:
             f = hfont("hand", 44); w = f.measureText(src)
-            c.drawString(src, (x0 + x1) / 2 - min(w, maxw) / 2, y1 - (y1 - y0) * 0.1, f, skia.Paint(AntiAlias=True, Color=skia.Color(90, 90, 100, int(200 * ease(p2 - 1.0)))))
+            c.drawString(src, (x0 + x1) / 2 - min(w, maxw) / 2, ys + 95, f, skia.Paint(AntiAlias=True, Color=skia.Color(90, 90, 100, int(200 * ease(p2 - 1.0)))))
     else:   # list
         items = [sentence(i) for i in v[1]]; n = len(items)
         fi = hfont("hand", 118)
         while max(fi.measureText("• " + i) for i in items) > maxw: fi = hfont("hand", fi.getSize() * 0.94)
         gap = min(fi.getSize() * 1.35, (y1 - y0) * 0.78 / n); ytop = (y0 + y1) / 2 - gap * (n - 1) / 2 + fi.getSize() * 0.3
-        slot = max(0.8, (dur - 0.4) / n); wr = min(1.0, slot * 0.75)
+        slot = 0.95; wr = 0.75
         for k, it in enumerate(items):
             p = (lt - 0.2 - k * slot) / wr
             if p > 0: px, py = write(c, "• " + it, mx, ytop + k * gap, fi, INK, p)

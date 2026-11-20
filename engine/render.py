@@ -410,8 +410,8 @@ class Ep:
                 if ins[0].startswith("phone_"): fx.phone(c, t, ins[0][6:], t_in, l)
                 elif ins[0] == "tv": fx.tv(c, t, t_in, l)
         elif kind in ("card", "list"):
-            t_in = l["start"] + (0.0 if kind == "card" else min(1.8, 0.3 * dur))
-            if t >= t_in: fx.notepad(c, t, l, ch["accent"], t_in)
+            t_in = l["start"] + (0.0 if kind == "card" else min(1.5, 0.2 * dur))
+            if t_in <= t < t_in + fx.notepad_len(l): fx.notepad(c, t, l, ch["accent"], t_in)
         elif kind in ("choice", "odds", "final"):
             c.drawRect(skia.Rect.MakeWH(W, H), skia.Paint(Color=skia.Color(4, 6, 10, 175)))
             c.save()
