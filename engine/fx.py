@@ -184,6 +184,8 @@ def chalk_card(c, t, ch):
 
 
 # ---------------- phone and TV screens ----------------
+MESSAGE = "I'm safe at home. If the network dies, meet me at the north lake. Love you."
+TV = ("BREAKING NEWS", "POWER GRID FAILING ACROSS THE REGION  •  STAY INDOORS  •  ")
 ALERTS = [("EMERGENCY ALERT", "Shelter in place. Stay indoors."), ("CITY OF RIVERTON", "Do not approach infected persons."),
           ("NEWS", "Hospital outbreak spreads overnight"), ("EMERGENCY ALERT", "Avoid highways. Roads closed."),
           ("MOM", "are you ok?? call me"), ("NEWS", "National Guard deployed downtown")]
@@ -215,7 +217,7 @@ def phone(c, t, kind, t_in, l):
             c.drawString(txt, br.left() + sw * 0.05, br.top() + bh * 0.75, fb, skia.Paint(AntiAlias=True, Color=skia.Color(255, 235, 235) if red else skia.Color(60, 60, 70)))
     elif kind == "message":
         c.drawRect(r, skia.Paint(Color=skia.Color(236, 239, 244)))
-        msg = "I'm safe at home. If the network dies, meet me at the north lake. Love you."
+        msg = MESSAGE
         f = skia.Font(None, sw * 0.072); n = int(len(msg) * min(1.0, max(0.0, (lt - 0.3) / 3.0)))
         words = msg[:n].split(" "); lines = [""]
         for w_ in words:
@@ -231,6 +233,22 @@ def phone(c, t, kind, t_in, l):
         if lt > 3.6:
             fs = skia.Font(None, sw * 0.045); c.drawString("Delivered", bx - fs.measureText("Delivered"), by + sw * 0.08, fs, skia.Paint(AntiAlias=True, Color=skia.Color(120, 125, 135)))
         c.drawRoundRect(skia.Rect.MakeXYWH(r.left() + sw * 0.05, r.bottom() - sh * 0.09, sw * 0.9, sh * 0.06), 30, 30, skia.Paint(AntiAlias=True, Color=skia.Color(255, 255, 255)))
+    elif kind == "gps":
+        c.drawRect(r, skia.Paint(Color=skia.Color(232, 236, 226)))
+        gp = skia.Paint(AntiAlias=True, Color=skia.Color(255, 255, 255), StrokeWidth=sw * 0.05, Style=skia.Paint.kStroke_Style)
+        for k in range(-2, 6):   # streets
+            c.drawLine(r.left(), r.top() + sh * (0.12 + 0.17 * k) + sw * 0.1, r.right(), r.top() + sh * (0.12 + 0.17 * k) - sw * 0.2, gp)
+            c.drawLine(r.left() + sw * (0.18 + 0.28 * k), r.top(), r.left() + sw * (0.05 + 0.28 * k), r.bottom(), gp)
+        c.drawRect(skia.Rect.MakeXYWH(r.left() + sw * 0.55, r.top() + sh * 0.55, sw * 0.4, sh * 0.2), skia.Paint(Color=skia.Color(196, 222, 180)))
+        dx = r.left() + sw * (0.5 + 0.35 * ease(lt / 3.5)); dy = r.top() + sh * (0.45 + 0.18 * ease(lt / 3.5))
+        c.drawCircle(dx, dy, sw * 0.16 * (0.6 + 0.4 * abs(math.sin(lt * 2))), skia.Paint(AntiAlias=True, Color=skia.Color(30, 120, 255, 50)))
+        c.drawCircle(dx, dy, sw * 0.045, skia.Paint(AntiAlias=True, Color=skia.Color(255, 255, 255)))
+        c.drawCircle(dx, dy, sw * 0.033, skia.Paint(AntiAlias=True, Color=skia.Color(30, 120, 255)))
+        if lt > 1.0:
+            a = ease((lt - 1.0) / 0.3); br = skia.Rect.MakeXYWH(r.left() + sw * 0.06, r.top() + sh * 0.06, sw * 0.88, sh * 0.1)
+            c.drawRoundRect(br, 24, 24, skia.Paint(AntiAlias=True, Color=skia.Color(200, 40, 45, int(240 * a))))
+            f = hfont("mono", sh * 0.034); s0 = "GPS SIGNAL LOST"
+            c.drawString(s0, br.centerX() - f.measureText(s0) / 2, br.centerY() + f.getSize() * 0.35, f, skia.Paint(AntiAlias=True, Color=skia.Color(255, 255, 255, int(255 * a))))
     elif kind == "silent":
         c.drawRect(r, skia.Paint(Color=skia.Color(20, 22, 28)))
         on = lt > 1.1; cx, cy = r.centerX(), r.top() + sh * 0.42
@@ -255,10 +273,10 @@ def tv(c, t, t_in, l):
     off = lt > 2.6; flick = 1.8 < lt < 2.6 and int(lt * 14) % 2 == 0
     if not off and not flick:
         c.drawRect(r, skia.Paint(Color=skia.Color(18, 40, 90)))
-        f = hfont("marker", sh * 0.16); s = "BREAKING NEWS"
+        f = hfont("marker", sh * 0.16); s = TV[0]
         c.drawRect(skia.Rect.MakeXYWH(r.left(), r.top() + sh * 0.18, sw, sh * 0.22), skia.Paint(Color=skia.Color(200, 30, 40)))
         c.drawString(s, r.centerX() - f.measureText(s) / 2, r.top() + sh * 0.35, f, skia.Paint(AntiAlias=True, Color=skia.Color(255, 255, 255)))
-        f2 = hfont("mono", sh * 0.11); s2 = "POWER GRID FAILING ACROSS THE REGION  •  STAY INDOORS  •  "
+        f2 = hfont("mono", sh * 0.11); s2 = TV[1]
         x = r.right() - (lt * sw * 0.35) % (f2.measureText(s2))
         c.drawRect(skia.Rect.MakeXYWH(r.left(), r.bottom() - sh * 0.2, sw, sh * 0.2), skia.Paint(Color=skia.Color(10, 10, 14)))
         for k in range(3): c.drawString(s2, x + k * f2.measureText(s2) - f2.measureText(s2), r.bottom() - sh * 0.06, f2, skia.Paint(AntiAlias=True, Color=skia.Color(255, 220, 90)))

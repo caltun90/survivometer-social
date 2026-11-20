@@ -337,6 +337,8 @@ class Ep:
             self.clips[sid] = sorted(f for f in os.listdir(d) if f.endswith(".jpg")); self.clip_dir = getattr(self, "clip_dir", {}); self.clip_dir[sid] = d
         spec2 = importlib.util.spec_from_file_location("script", os.path.join(self.ep, "script.py")); m2 = importlib.util.module_from_spec(spec2); spec2.loader.exec_module(m2)
         self.clocks = [c.get("clock") for c in m2.CHAPTERS]
+        for k in ("ALERTS", "MESSAGE", "TV"):   # per-episode texts for the phone and TV cutaways
+            if hasattr(m2, k): setattr(fx, k, getattr(m2, k))
         files = {}
         for sid, name, *_ in m.SHOTS:
             f = sorted(glob.glob(os.path.join(self.ep, "img", f"{sid}_*.png")) + glob.glob(os.path.join(self.ep, "img", f"{sid}_*.jpg")))
