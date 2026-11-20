@@ -11,7 +11,7 @@ TTS_MODEL = os.environ.get("TTS_MODEL", "gemini-3.1-flash-tts-preview")
 ASR_MODEL = os.environ.get("ASR_MODEL", "gemini-3-flash-preview")
 SR = 24000
 LEAD = 0.20            # voice starts this early (hook rule: sound by 0.5 s)
-BEAT = float(os.environ.get("BEAT", "1.9"))            # chapter title card length
+BEAT = float(os.environ.get("BEAT", "2.8"))            # chapter title card length (chalk writing takes 1.75 s, then it must stay readable)
 GAP_MIN, GAP_MAX = float(os.environ.get("GAP_MIN", "0.28")), float(os.environ.get("GAP_MAX", "0.55"))
 TAIL = 1.6
 

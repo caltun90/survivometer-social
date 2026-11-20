@@ -62,7 +62,7 @@ CHAPTERS = [
  ]),
  dict(label="WEEK 1", clock="05:55", tag="THE ROAD NORTH", accent="#B05CFF", lines=[
   ("Week one. The city has gone quiet. No traffic, no music, no planes. The living are hiding, and the dead are everywhere.", ("big", "WEEK 1", "THE CITY GOES QUIET")),
-  ("Then the smell arrives. Without power, sewer pumps stop. In San Diego's two thousand eleven blackout, sewage started spilling within hours. Disease is now as dangerous as any bite.", ("card", "HOURS", "UNTIL SEWAGE SPILLED. SAN DIEGO, 2011", "Source: Rocky Mountain Institute"), "Then the smell arrives. Without power, sewer pumps stop. In San Diego's 2011 blackout, sewage started spilling within hours. Disease is now as dangerous as any bite."),
+  ("Then the smell arrives. Without power, sewer pumps stop. In San Diego's two thousand eleven blackout, sewage started spilling within hours. Disease is now as dangerous as any bite.", ("card", "HOURS", "Until sewage spilled. San Diego, 2011", "Source: Rocky Mountain Institute"), "Then the smell arrives. Without power, sewer pumps stop. In San Diego's 2011 blackout, sewage started spilling within hours. Disease is now as dangerous as any bite."),
   ("You climb to the roof and look out over the city. You already know you can't stay.", ("choice", "STAY", "LEAVE")),
   ("Cities have the most people, the most infected, and the least food per person. Everything that kept you alive here is running out.", ("list", ["MOST PEOPLE", "MOST INFECTED", "LEAST FOOD"])),
   ("There's a lake an hour north. Fresh water, open views, and far fewer of them.", ("list", ["FRESH WATER", "OPEN VIEWS", "FEWER OF THEM"])),

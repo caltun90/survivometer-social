@@ -5,7 +5,7 @@ Assets (ChatGPT, generated once, reused by every episode): engine/assets/a1_desk
 a2_chalkboard.png, a3_phone_hand.png, a4_tv_blank.png. Screen and paper rectangles are found
 automatically and cached in engine/assets/rects.json.
 """
-import os, json, math
+import os, json, math, re
 import numpy as np, skia
 from PIL import Image
 
@@ -110,20 +110,28 @@ def pen(c, x, y, chalk=False):
 
 def sentence(s):
     s = s.strip()
-    return s if any(ch.islower() for ch in s) else s[:1] + s[1:].lower()
+    if any(ch.islower() for ch in s): return s           # already written in normal case in the script: keep it
+    s = s[:1] + s[1:].lower()
+    return re.sub(r"([.!?] )([a-z])", lambda m: m.group(1) + m.group(2).upper(), s)   # "People. A handful of roads."
 
 
 # ---------------- notepad: stats and lists are written by hand ----------------
-def notepad_len(l):
-    """How long the notepad stays on screen: writing time plus a short hold, then the picture comes back."""
+def notepad_len(l, t_in=None):
+    """How long the notepad stays on screen: writing time plus a short hold, then the picture comes back.
+    On a line too short for that, the writing speeds up (see _np_q) so it always finishes before the cut."""
     v = l["visual"]
-    return 0.15 + 0.9 + 1.4 + 1.2 if v[0] == "card" else 0.2 + len(v[1]) * 0.95 + 1.2
+    base = 0.15 + 0.9 + 1.4 + 1.2 if v[0] == "card" else 0.2 + len(v[1]) * 0.95 + 1.2
+    return base * (_np_q(l, t_in, base) if t_in is not None else 1.0)
+
+
+def _np_q(l, t_in, base):
+    return min(1.0, max(0.5, (l["end"] + 0.3 - t_in) / base))
 
 
 def notepad(c, t, l, accent, t_in):
     R = rects()["a1_desk_notepad"]; x0, y0, x1, y1 = R
     draw_asset(c, "a1_desk_notepad", t_in, t)
-    v = l["visual"]; lt = t - t_in; dur = max(2.0, l["end"] - t_in)
+    v = l["visual"]; lt = (t - t_in) / _np_q(l, t_in, notepad_len(l))
     px, py = None, None
     mx = x0 + (x1 - x0) * 0.09; maxw = (x1 - x0) * 0.82
     if v[0] == "card":
@@ -140,14 +148,15 @@ def notepad(c, t, l, accent, t_in):
             c.drawLine((x0 + x1) / 2 - fb.measureText(big) / 2, yb + 22, (x0 + x1) / 2 - fb.measureText(big) / 2 + w, yb + 26, skia.Paint(AntiAlias=True, Color=skia.Color(200, 40, 40), StrokeWidth=7, StrokeCap=skia.Paint.kRound_Cap))
         elif p1 >= 1.6:
             c.drawLine((x0 + x1) / 2 - fb.measureText(big) / 2, yb + 22, (x0 + x1) / 2 + fb.measureText(big) / 2, yb + 26, skia.Paint(AntiAlias=True, Color=skia.Color(200, 40, 40), StrokeWidth=7, StrokeCap=skia.Paint.kRound_Cap))
-        if src and p2 > 1.0:
+        if src and p2 > 0.5:
             f = hfont("hand", 44); w = f.measureText(src)
-            c.drawString(src, (x0 + x1) / 2 - min(w, maxw) / 2, ys + 95, f, skia.Paint(AntiAlias=True, Color=skia.Color(90, 90, 100, int(200 * ease(p2 - 1.0)))))
+            c.drawString(src, (x0 + x1) / 2 - min(w, maxw) / 2, ys + 95, f, skia.Paint(AntiAlias=True, Color=skia.Color(90, 90, 100, int(220 * ease((p2 - 0.5) / 0.25)))))
     else:   # list
         items = [sentence(i) for i in v[1]]; n = len(items)
         fi = hfont("hand", 118)
         while max(fi.measureText("• " + i) for i in items) > maxw: fi = hfont("hand", fi.getSize() * 0.94)
-        gap = min(fi.getSize() * 1.35, (y1 - y0) * 0.78 / n); ytop = (y0 + y1) / 2 - gap * (n - 1) / 2 + fi.getSize() * 0.3
+        # the list lives in the upper part of the page: the caption sits on the bottom strip and must not cover the last item
+        gap = min(fi.getSize() * 1.35, (y1 - y0) * 0.64 / max(1, n - 1)); ytop = y0 + (y1 - y0) * 0.447 - gap * (n - 1) / 2 + fi.getSize() * 0.3
         slot = 0.95; wr = 0.75
         for k, it in enumerate(items):
             p = (lt - 0.2 - k * slot) / wr
@@ -166,6 +175,8 @@ def chalk_card(c, t, ch):
     cx = (x0 + x1) / 2; yl = y0 + (y1 - y0) * 0.52; yt = yl + 130
     while fl.measureText(ch["label"]) > (x1 - x0) * 0.85: fl = hfont("marker", fl.getSize() * 0.92)
     while ft.measureText(ch["tag"]) > (x1 - x0) * 0.85: ft = hfont("marker", ft.getSize() * 0.92)
+    q = min(1.0, max(0.3, (b1 - b0 - 0.8) / 1.75))   # a short card writes faster; the full tag is always up 0.8 s before the cut
+    lt = lt / q
     px, py = write(c, ch["label"], cx, yl, fl, CHALK, lt / 0.85, "c")
     if lt > 0.95: px, py = write(c, ch["tag"], cx, yt, ft, skia.Color(250, 214, 120), (lt - 0.95) / 0.8, "c")
     if lt < 1.8: pen(c, px, py, chalk=True)
@@ -190,7 +201,7 @@ def phone(c, t, kind, t_in, l):
     c.save(); c.clipRRect(skia.RRect.MakeRectXY(r, 34, 34), skia.ClipOp.kIntersect, True)
     if kind == "alerts":
         c.drawRect(r, skia.Paint(Color=skia.Color(16, 20, 30)))
-        n = int(min(len(ALERTS), 1 + lt / 0.55)); bh = sh * 0.15; gap = sh * 0.02
+        n = int(min(len(ALERTS), 1 + lt / 0.55)); bh = sh * 0.135; gap = sh * 0.018   # six alerts fit the screen, none is cut at the bottom
         for i in range(n):
             a = ease((lt - i * 0.55) / 0.3); k = n - 1 - i
             y = r.top() + sh * 0.05 + k * (bh + gap) - (1 - a) * bh
