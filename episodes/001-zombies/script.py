@@ -10,7 +10,7 @@ KOKORO_VOICE = "am_michael"   # Cem chose it, 20 Nov 2026 (local Kokoro voice, s
 START_ODDS = 50
 
 CHAPTERS = [
- dict(label="HOUR 0", tag="THE OUTBREAK", accent="#FFB020", lines=[
+ dict(label="HOUR 0", clock="07:00", tag="THE OUTBREAK", accent="#FFB020", lines=[
   ("The dead are walking. Now what?", ("hook", "THE DEAD ARE WALKING")),
   ("It's seven a.m. tomorrow. Your phone explodes with alerts. A strange outbreak started overnight at a city hospital.", ("big", "7:00 AM", "TOMORROW")),
   ("Then you hear it outside. A scream, a car alarm, and something walking slowly down the middle of your street.", ("big", "SOMETHING", "IS WALKING DOWN YOUR STREET")),
@@ -18,7 +18,7 @@ CHAPTERS = [
   ("This is The Survivometer. We run the scenario hour by hour, and at the end, we estimate your odds of surviving one full year.", ("big", "THE SURVIVOMETER", "HOUR BY HOUR. ONE FULL YEAR.")),
   ("Right now, your odds are fifty percent. Every choice you make moves the needle.", ("odds", 50)),
  ]),
- dict(label="HOUR 1", tag="THE FIRST INSTINCT", accent="#FF8A1F", lines=[
+ dict(label="HOUR 1", clock="08:00", tag="THE FIRST INSTINCT", accent="#FF8A1F", lines=[
   ("Hour one. Someone is pounding on your door. It's your neighbor from across the hall, and he does not answer when you call his name.", ("big", "KNOCK KNOCK", "DO NOT OPEN IT")),
   ("You don't open it. Good call.", ("big", "GOOD CALL", "THE DOOR STAYS SHUT")),
   ("Out the window, the whole city has the same idea. Grab the keys and drive.", ("icon", "car", "DRIVE?")),
@@ -28,7 +28,7 @@ CHAPTERS = [
   ("Then take stock. Count your food, your medicine, and your batteries.", ("list", ["COUNT YOUR FOOD", "YOUR MEDICINE", "YOUR BATTERIES"])),
   ("You stayed, and your odds climb to fifty five percent.", ("odds", 55)),
  ]),
- dict(label="HOUR 6", tag="THE CITY FALLS", accent="#FF6A2A", lines=[
+ dict(label="HOUR 6", clock="13:00", tag="THE CITY FALLS", accent="#FF6A2A", lines=[
   ("Hour six. The sirens have stopped. That is not a good sign.", ("big", "SILENCE", "THE SIRENS STOPPED")),
   ("From your window you count them. Ten on your block. Then thirty. Every scream pulls more of them toward the noise.", ("big", "10... 30...", "EVERY SCREAM PULLS MORE")),
   ("Your phone still has a signal, but not for long. Cell towers fall back on batteries that typically last between two and eight hours.", ("card", "2-8 HRS", "TYPICAL CELL TOWER BATTERY BACKUP", "Sources: FCC backup power rule, industry reports")),
@@ -37,7 +37,7 @@ CHAPTERS = [
   ("Download offline maps, write the important numbers on paper, and plan your way out of the city.", ("icon", "map", "OFFLINE MAPS")),
   ("Quiet and prepared, you gain three points.", ("odds", 58)),
  ]),
- dict(label="DAY 1", tag="THE LIGHTS GO OUT", accent="#FF4D3D", lines=[
+ dict(label="DAY 1", clock="19:40", tag="THE LIGHTS GO OUT", accent="#FF4D3D", lines=[
   ("Day one. The lights flicker, then go out.", ("icon", "bolt", "BLACKOUT")),
   ("Power plants need fuel deliveries and people at the controls. Energy analysts who gamed out this exact scenario estimated that fossil fuel plants would start shutting down within about twenty four hours.", ("card", "24 HRS", "UNTIL FOSSIL PLANTS START TO TRIP", "Source: Rocky Mountain Institute"), "Power plants need fuel deliveries and people at the controls. Energy analysts who gamed out this exact scenario estimated that fossil fuel plants would start shutting down within about 24 hours."),
   ("Then the blackout spreads like dominoes. No gas pumps, no card payments, no refrigeration, and no elevators.", ("list", ["NO GAS PUMPS", "NO CARD PAYMENTS", "NO FRIDGES", "NO ELEVATORS"])),
@@ -47,7 +47,7 @@ CHAPTERS = [
   ("You sit in the dark, you whisper, and you wait for morning.", ("big", "DARK AND QUIET", "WAIT FOR MORNING")),
   ("If you stayed dark, you climb to sixty. If you lit up your window, you just dropped to thirty five.", ("odds", 60)),
  ]),
- dict(label="DAY 3", tag="THE SUPPLY RUN", accent="#FF2E4D", lines=[
+ dict(label="DAY 3", clock="11:50", tag="THE SUPPLY RUN", accent="#FF2E4D", lines=[
   ("Day three. The taps run dry.", ("icon", "drop", "TAPS RUN DRY")),
   ("City water pressure depends on electric pumps. Water towers buy you about a day, and then nothing comes out.", ("big", "NO POWER", "NO WATER PRESSURE")),
   ("A person can last weeks without food, but only about three days without water.", ("card", "3 DAYS", "WITHOUT WATER", "")),
@@ -60,7 +60,7 @@ CHAPTERS = [
   ("You don't run. You walk out the back door, slow and silent, while they shuffle toward the noise.", ("big", "DON'T RUN", "WALK. SLOW. SILENT.")),
   ("You made it home with five days of water. Your odds rise to sixty two.", ("odds", 62)),
  ]),
- dict(label="WEEK 1", tag="THE ESCAPE", accent="#B05CFF", lines=[
+ dict(label="WEEK 1", clock="05:55", tag="THE ESCAPE", accent="#B05CFF", lines=[
   ("Week one. The city has gone quiet. The living are hiding, and the dead are everywhere.", ("big", "WEEK 1", "THE CITY GOES QUIET")),
   ("Without power, sewers back up. In San Diego's two thousand eleven blackout, sewage started spilling within hours. Disease is now as dangerous as any bite.", ("card", "HOURS", "UNTIL SEWAGE SPILLED. SAN DIEGO, 2011", "Source: Rocky Mountain Institute"), "Without power, sewers back up. In San Diego's 2011 blackout, sewage started spilling within hours. Disease is now as dangerous as any bite."),
   ("Choice four. Stay in the city, or leave?", ("choice", "STAY", "LEAVE")),
@@ -72,7 +72,7 @@ CHAPTERS = [
   ("You lie in a ditch for an hour, barely breathing, until the last one passes.", ("big", "ONE HOUR", "IN A DITCH")),
   ("On the other side, you meet five survivors heading north. Leaving with a group, your odds rise to sixty five.", ("odds", 65)),
  ]),
- dict(label="MONTH 1", tag="THE CAMP", accent="#3A8BFF", lines=[
+ dict(label="MONTH 1", clock="22:30", tag="THE CAMP", accent="#3A8BFF", lines=[
   ("Month one. Your group has a camp by the lake.", ("big", "MONTH 1", "THE LAKE CAMP")),
   ("You build a fence from pallets and car doors, hang empty cans on a wire as an alarm, and take turns on night watch.", ("list", ["A FENCE", "CAN ALARMS", "NIGHT WATCH"])),
   ("The dangers now are small and boring. A cut that gets infected. Water you forgot to boil.", ("list", ["INFECTED CUTS", "UNBOILED WATER", "EXHAUSTION"])),
@@ -83,7 +83,7 @@ CHAPTERS = [
   ("Choice five. Hide from other survivors, or trade with them?", ("choice", "HIDE", "TRADE")),
   ("Trade. A group with a nurse, a mechanic, and a farmer is a place people will defend. Your odds climb to sixty six.", ("odds", 66)),
  ]),
- dict(label="YEAR 1", tag="THE TWIST", accent="#22D37A", lines=[
+ dict(label="YEAR 1", clock="06:30", tag="THE TWIST", accent="#22D37A", lines=[
   ("Year one. Here is the twist the movies skip.", ("big", "YEAR 1", "THE TWIST THE MOVIES SKIP")),
   ("The dead have a problem too. A body that never rests and never heals slowly falls apart in sun, rain, and frost.", ("list", ["NEVER RESTS", "NEVER HEALS", "SUN. RAIN. FROST."])),
   ("The first winter freezes them in the fields like statues. By spring, the herds are slower, thinner, and fewer.", ("icon", "snow", "THE FIRST WINTER")),

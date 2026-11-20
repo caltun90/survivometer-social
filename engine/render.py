@@ -8,6 +8,7 @@ import sys, os, json, math, subprocess
 import numpy as np, skia
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import toon
+import fx
 
 W, H, FPS = 1920, 1080, 30
 FD = "/usr/share/fonts/opentype/inter/"
@@ -203,10 +204,14 @@ class Ep:
     def hud(self, c, t, ch, on_card, full_gauge):
         a = ease((t - 2.3) / 0.5)
         if a <= 0: return
-        f, w, _ = fit(ch["label"], "black", 46, 600)
-        c.drawRoundRect(skia.Rect.MakeXYWH(70, 62, w + 56, 74), 14, 14, skia.Paint(AntiAlias=True, Color=col(ch["accent"], a)))
-        c.drawString(ch["label"], 98, 115, f, skia.Paint(AntiAlias=True, Color=col("#06080C", a)))
-        text(c, "THE SURVIVOMETER", 72, 178, "bold", 26, col("#FFFFFF", 0.55 * a), align="l")
+        if on_card: a = 0.0
+        if hasattr(self, "clocks") and a > 0:
+            fx.badge(c, t, ch, self.clocks[self.ch.index(ch)], a)
+        elif not hasattr(self, "clocks"):
+            f, w, _ = fit(ch["label"], "black", 46, 600)
+            c.drawRoundRect(skia.Rect.MakeXYWH(70, 62, w + 56, 74), 14, 14, skia.Paint(AntiAlias=True, Color=col(ch["accent"], a)))
+            c.drawString(ch["label"], 98, 115, f, skia.Paint(AntiAlias=True, Color=col("#06080C", a)))
+        if a <= 0: return
         if not full_gauge:
             c.saveLayerAlpha(None, int(255 * a)); self.gauge(c, W - 210, 205, 128, self.odds_at(t), ch["accent"]); c.restore()
         c.drawRect(skia.Rect.MakeXYWH(0, H - 8, W * t / self.total, 8), skia.Paint(Color=col(ch["accent"], 0.9 * a)))
@@ -320,6 +325,9 @@ class Ep:
         for sid, name, lines, side, desc in m.SHOTS:
             for li in lines: line_img[li] = sid
         for li, sid in m.REUSE.items(): line_img[li] = sid
+        self.inserts = getattr(m, "INSERTS", {})
+        spec2 = importlib.util.spec_from_file_location("script", os.path.join(self.ep, "script.py")); m2 = importlib.util.module_from_spec(spec2); spec2.loader.exec_module(m2)
+        self.clocks = [c.get("clock") for c in m2.CHAPTERS]
         files = {}
         for sid, name, *_ in m.SHOTS:
             f = sorted(glob.glob(os.path.join(self.ep, "img", f"{sid}_*.png")) + glob.glob(os.path.join(self.ep, "img", f"{sid}_*.jpg")))
@@ -378,20 +386,17 @@ class Ep:
                 f, w, size = fit(line_txt, "black", 148, 1700); yy = 190 + j * 150
                 c.drawString(line_txt, W / 2 - w / 2, yy, f, skia.Paint(AntiAlias=True, Color=toon.INK, Style=skia.Paint.kStroke_Style, StrokeWidth=22, StrokeJoin=skia.Paint.kRound_Join))
                 c.drawString(line_txt, W / 2 - w / 2, yy, f, skia.Paint(AntiAlias=True, Color=col(colr)))
-        side = kind in ("list", "card")
+        dur = l["end"] - l["start"]; idx = self.lines.index(l); ins = self.inserts.get(idx)
         if on_card:
-            c.drawRect(skia.Rect.MakeWH(W, H), skia.Paint(Color=skia.Color(4, 6, 10, 165))); self.card(c, t, ch)
-        elif side:
-            a = ease((t - l["start"]) / 0.35)
-            px, py, pw, ph = 1060, 285, 810, 515
-            c.save(); c.translate((1 - a) * 120, 0)
-            c.drawRRect(skia.RRect.MakeRectXY(skia.Rect.MakeXYWH(px, py, pw, ph), 34, 34), skia.Paint(AntiAlias=True, Color=skia.Color(8, 11, 18, int(205 * a))))
-            c.drawRRect(skia.RRect.MakeRectXY(skia.Rect.MakeXYWH(px, py, pw, ph), 34, 34), skia.Paint(AntiAlias=True, Style=skia.Paint.kStroke_Style, StrokeWidth=3, Color=col(ch["accent"], 0.55 * a)))
-            c.clipRect(skia.Rect.MakeXYWH(px, py, pw, ph))
-            sc = 0.49 if kind == "card" else 0.6
-            self._listw = pw / sc - 190
-            c.translate(px + pw / 2, py + ph / 2); c.scale(sc, sc); c.translate(-W / 2, -H / 2)
-            self.visual(c, max(t, l["start"]), l, ch["accent"]); c.restore(); self._listw = 1400
+            fx.chalk_card(c, t, ch)
+        elif ins:
+            t_in = l["start"] + ins[1] * dur
+            if t >= t_in:
+                if ins[0].startswith("phone_"): fx.phone(c, t, ins[0][6:], t_in, l)
+                elif ins[0] == "tv": fx.tv(c, t, t_in, l)
+        elif kind in ("card", "list"):
+            t_in = l["start"] + (0.0 if kind == "card" else min(1.8, 0.3 * dur))
+            if t >= t_in: fx.notepad(c, t, l, ch["accent"], t_in)
         elif kind in ("choice", "odds", "final"):
             c.drawRect(skia.Rect.MakeWH(W, H), skia.Paint(Color=skia.Color(4, 6, 10, 175)))
             c.save()

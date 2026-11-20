@@ -32,6 +32,14 @@ Bu depo kanalın tek kaynağıdır: `caltun90/survivometer-social` (herkese aç�
 
 ## 4. Bölüm üretimi
 
+Sahne cihazları (Cem'in örnek videosundan, 20 Kasım 2026; videoyu düz slayt olmaktan çıkarır):
+- Sol üstte kırmızı gün rozeti (HOUR 6, DAY 1) ve yanında işleyen hikaye saati. Saat script.py'de her bölümün `clock` alanı.
+- Kart ve liste satırları masadaki not defterine elle yazılır, kalem yazıyı takip eder (engine/fx.py, notepad).
+- Bölüm başlıkları kara tahtaya tebeşirle yazılır (chalk_card).
+- Telefon ve TV araya girişleri: shots.py'de INSERTS = {satır: ("phone_alerts" | "phone_message" | "phone_silent" | "tv", başlangıç oranı)}. Yeni bölümde konuya uyan 3-5 araya giriş seç; yeni ekran türü gerekirse fx.py'ye ekle.
+- Ortak görseller engine/assets/ (masa ve defter, kara tahta, eldeki telefon, TV). Her bölümde yeniden üretme.
+- Plan: ilk 4-5 saniye Veo videosu (hesap bölgesi Türkiye olunca).
+
 Görsel adımı (ses ve hizalamadan sonra, render'dan önce):
 - `episodes/NNN-slug/shots.py`: SHOTS = (kimlik, ad, satır numaraları, side, açıklama). Her satır tam bir sahneye ya da REUSE ile başka sahnenin görseline bağlanır. Liste ve kart satırlarının sahnesinde `side=True`: karakter solda, sağ %40 sakin, çünkü bilgi paneli sağa gelir.
 - ChatGPT'de yeni bir sohbet aç. İlk mesajda stil ve karakter tarifini ver, sonra her mesajda tek görsel iste. Her istemin başına kısa stil ve karakter hatırlatması ekle (yoksa 12-13 görselden sonra stil kayıyor). İstemde etiket `SHOT (sNN_ad)` biçiminde olsun; indirme etiketle eşleşir.

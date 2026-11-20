@@ -62,3 +62,5 @@ SHOTS = [
  ("n68", "outro_wave_us", [68, 69, 70], False, "p"),
 ]
 REUSE = {65: "s04", 66: "n09", 67: "n63"}
+# cutaways drawn in code: line -> (device, start as a fraction of the line)
+INSERTS = {1: ("phone_alerts", 0.35), 17: ("phone_message", 0.25), 18: ("phone_silent", 0.2), 21: ("tv", 0.0)}
